@@ -1,5 +1,8 @@
+import 'package:demo0/src/bloc/login/login_bloc.dart';
+import 'package:demo0/src/models/user.dart';
 import 'package:demo0/src/pages/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -9,6 +12,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  int count = 0;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _usernameController.text = "admin";
+    _passwordController.text = "1234";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,30 +33,79 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [_buildBanner(), _buildForm()],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _buildForm() {
+    return Card(
+      elevation: 7,
+      margin: EdgeInsets.only(top: 50, left: 32, right: 32),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset("assets/images/logo.png"),
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Card(
-                child: SizedBox(
-                  height: 200,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text("Body"),
-                        OutlinedButton(onPressed: () {}, child: Text("Login")),
-                      ],
-                    ),
-                  ),
-                ),
+            TextField(
+              controller: _usernameController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'codemobiles@gmail.com',
+                labelText: 'Username',
+                icon: Icon(Icons.email),
               ),
-            )
+            ),
+            TextField(
+              obscureText: true,
+              controller: _passwordController,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter password',
+                labelText: 'Password',
+                icon: Icon(Icons.password_outlined),
+              ),
+            ),
+            SizedBox(height: 10),
+            if(context.read<LoginBloc>().state.status == LoginStatus.failed) Text(
+              "!Error, invalid username or password",
+              style: TextStyle(color: Colors.red),
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _handleLogin,
+              child: Text("Login"),
+            ),
+            OutlinedButton(onPressed: _handleRegister, child: Text("Register")),
           ],
         ),
       ),
     );
+  }
+
+  _buildBanner() => Image.asset("assets/images/logo.png");
+
+  void _handleLogin() {
+    final user = User(
+      _usernameController.text,
+      _passwordController.text,
+    );
+
+    context.read<LoginBloc>().add(LoginEventSubmit(user));
+  }
+
+  void _handleRegister() {
+    final user = User(
+      _usernameController.text,
+      _passwordController.text,
+    );
+
+    context.read<LoginBloc>().add(LoginEventRegister(user));
   }
 }
