@@ -14,6 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var _isShowListView = true;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -24,21 +31,57 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dummyArray = ["Angular", "React", "Flutter", "Vue"];
-
     return Scaffold(
         appBar: AppBar(
           title: Text('HomePage'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isShowListView = !_isShowListView;
+                });
+              },
+              icon: Icon(_isShowListView ? Icons.list : Icons.grid_3x3),
+            )
+          ],
         ),
         body: Container(
           width: double.infinity,
           height: double.infinity,
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
-              return Column(children: state.youtubes.map((e) => Text(e.title)).toList(),);
+              return _isShowListView ? _buildListView(state.youtubes) : _buildGridView(state.youtubes);
             },
           ),
         ));
   }
 
+  Widget _buildGridView(List<Youtube> youtubes) {
+    return GridView.builder(
+      itemCount: youtubes.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+            color: Colors.black,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(youtubes[index].title, style: TextStyle(color: Colors.white)),
+                  Image.network(youtubes[index].youtubeImage)
+                ],
+              ),
+            ));
+      },
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 1, crossAxisSpacing: 1, childAspectRatio: 0.8),
+    );
+  }
+
+  Widget _buildListView(List<Youtube> youtubes) {
+    return ListView.builder(
+      itemCount: youtubes.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Text(youtubes[index].title);
+      },
+    );
+  }
 }
